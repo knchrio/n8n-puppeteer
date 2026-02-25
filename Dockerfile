@@ -1,12 +1,10 @@
-# Use n8n debian image as base (has apt-get)
-FROM n8nio/n8n:latest-debian
+# Build n8n with Puppeteer Stealth support
+# Use node:20-bookworm-slim (Debian 12, active repos)
+FROM node:20-bookworm-slim
 
-USER root
-
-# Install Chromium and dependencies via apt-get
+# Install system dependencies for Chromium
 RUN apt-get update && apt-get install -y \
     chromium \
-    chromium-sandbox \
     libglib2.0-0 \
     libnss3 \
     libatk1.0-0 \
@@ -23,11 +21,23 @@ RUN apt-get update && apt-get install -y \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
-# Install puppeteer stealth plugins
-RUN npm install -g puppeteer-extra puppeteer-extra-plugin-stealth
+# Install n8n globally
+RUN npm install -g n8n
 
-# Set Chromium path for puppeteer
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+# Install puppeteer packages globally
+RUN npm install -g puppeteer-extra puppeteer-extra-plugin-stealth puppeteer-core
+
+# Create node user and n8n data directory
+RUN useradd -m -u 1000 node 2>/dev/null || true
+RUN mkdir -p /home/node/.n8n && chown -R node:node /home/node
+
+# Set Chromium environment variables
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 USER node
+WORKDIR /home/node
+
+EXPOSE 5678
+
+CMD ["n8n", "start"]
