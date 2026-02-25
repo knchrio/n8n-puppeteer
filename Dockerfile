@@ -25,7 +25,7 @@ RUN apt-get update && apt-get install -y \
 RUN npm install -g n8n
 
 # Install puppeteer packages globally
-RUN npm install -g puppeteer-extra puppeteer-extra-plugin-stealth puppeteer-core puppeteer-extra-plugin-user-preferences
+RUN npm install -g puppeteer-extra puppeteer-extra-plugin-stealth puppeteer-core puppeteer-extra-plugin-user-preferences puppeteer-extra-plugin-user-data-dir
 
 # Create node user and n8n data directory
 RUN useradd -m -u 1000 node 2>/dev/null || true
